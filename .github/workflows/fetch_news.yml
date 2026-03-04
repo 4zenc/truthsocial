@@ -1,0 +1,22 @@
+name: AI News Factory
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Runs every 6 hours
+  workflow_dispatch: # Allows you to run it manually
+
+jobs:
+  run-ai-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with: { python-version: '3.9' }
+      - name: Install dependencies
+        run: pip install google-generativeai supabase
+      - name: Run Factory
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: python scripts/ai_worker.py
