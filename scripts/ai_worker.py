@@ -1,30 +1,28 @@
 import os
+import json
 import google.generativeai as genai
 from supabase import create_client
 
-# Setup
-genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
-supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
-
 def process_news():
-    # Use 'gemini-1.5-flash' (without v1beta) - this is the standard model name
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # 1. Configure
+    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
     
-    # Updated Prompt for cleaner JSON output
-    prompt = "Find 1 major global news event today. Return ONLY valid JSON with keys: 'headline', 'impact' (for a citizen), and 'source_url'. No markdown, no extra text."
+    # 2. Use 'gemini-pro' (more stable across different API accounts)
+    model = genai.GenerativeModel('gemini-pro')
+    
+    # 3. Simple prompt
+    prompt = "Give me one global news headline, a one-sentence impact for a normal person, and a source URL. Return ONLY raw JSON like: {'headline': '...', 'impact': '...', 'source_url': '...'}"
     
     response = model.generate_content(prompt)
     
-    # Clean string to ensure it is just JSON
+    # 4. Clean text
     text = response.text.replace("```json", "").replace("```", "").strip()
-    
-    # Import json library to parse safely
-    import json
     data = json.loads(text)
     
-    # Push to Supabase
+    # 5. Insert
     supabase.table("news_items").insert(data).execute()
-    print("Success: News posted.")
+    print("Success")
 
 if __name__ == "__main__":
     process_news()

@@ -1,7 +1,5 @@
 name: AI News Factory
 on:
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,7 +11,7 @@ jobs:
         uses: actions/setup-python@v4
         with: { python-version: '3.9' }
       - name: Install dependencies
-        run: pip install -r scripts/requirements.txt
+        run: pip install google-generativeai supabase
       - name: Run Factory
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
